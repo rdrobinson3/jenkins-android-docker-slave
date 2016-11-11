@@ -5,7 +5,7 @@ ENV ANDROID_HOME /opt/android-sdk-linux
 
 # ------------------------------------------------------
 # --- Install required tools
-
+USER root
 RUN apt-get update -y
 
 # Base (non android specific) tools
