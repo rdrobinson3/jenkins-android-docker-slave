@@ -101,16 +101,15 @@ RUN gradle -v
 # ------------------------------------------------------
 # --- Install Maven 3 from PPA
 
-RUN apt-get purge maven maven2
+RUN apt-get -y purge maven maven2
 RUN apt-get update
 RUN apt-get -y install maven
 RUN mvn --version
 
 # ------------------------------------------------------
 # --- Install Fastlane
-
-RUN gem install fastlane --no-document
-RUN fastlane --version
+#RUN gem install fastlane --no-document
+#RUN fastlane --version
 
 # copied from https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes
 ENV CLOUDSDK_CORE_DISABLE_PROMPTS 1
