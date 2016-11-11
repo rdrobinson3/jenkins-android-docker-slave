@@ -1,18 +1,6 @@
 FROM jenkinsci/jnlp-slave
 #FROM bitriseio/docker-bitrise-base-alpha:latest
 
-# copied from https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes
-ENV CLOUDSDK_CORE_DISABLE_PROMPTS 1
-ENV PATH /opt/google-cloud-sdk/bin:$PATH
-USER root
-RUN apt-get update -y
-RUN apt-get install -y jq
-RUN curl https://sdk.cloud.google.com | bash && mv google-cloud-sdk /opt
-RUN gcloud components install kubectl
-
-# added by Ackee
-RUN /bin/sh -c curl https://get.docker.com | sh
-
 ENV ANDROID_HOME /opt/android-sdk-linux
 
 # ------------------------------------------------------
@@ -123,6 +111,18 @@ RUN mvn --version
 
 RUN gem install fastlane --no-document
 RUN fastlane --version
+
+# copied from https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes
+ENV CLOUDSDK_CORE_DISABLE_PROMPTS 1
+ENV PATH /opt/google-cloud-sdk/bin:$PATH
+USER root
+RUN apt-get update -y
+RUN apt-get install -y jq
+RUN curl https://sdk.cloud.google.com | bash && mv google-cloud-sdk /opt
+RUN gcloud components install kubectl
+
+# added by Ackee
+RUN /bin/sh -c curl https://get.docker.com | sh
 
 # ------------------------------------------------------
 # --- Cleanup and rev num
