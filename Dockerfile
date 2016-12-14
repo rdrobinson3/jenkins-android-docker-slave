@@ -20,7 +20,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 l
 # ------------------------------------------------------
 # --- Download Android SDK tools into $ANDROID_HOME
 
-RUN cd /opt && wget -q https://dl.google.com/android/android-sdk_r25.2.3-linux.tgz -O android-sdk.tgz
+RUN cd /opt && wget -q https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz -O android-sdk.tgz
 RUN cd /opt && tar -xvzf android-sdk.tgz
 RUN cd /opt && rm -f android-sdk.tgz
 
