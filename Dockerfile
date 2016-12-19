@@ -6,23 +6,24 @@ ENV ANDROID_HOME /opt/android-sdk-linux
 # ------------------------------------------------------
 # --- Install required tools
 USER root
-RUN apt-get update -y
+#RUN apt-get update -y
 
 # Base (non android specific) tools
 # -> should be added to bitriseio/docker-bitrise-base
 
 # Dependencies to execute Android builds
-RUN dpkg --add-architecture i386
-RUN apt-get update -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 libstdc++6:i386 libgcc1:i386 libncurses5:i386 libz1:i386
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \ 
+    DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 libstdc++6:i386 libgcc1:i386 libncurses5:i386 libz1:i386 && \
+    rm -rf /var/lib/apt/lists/*
 
 
 # ------------------------------------------------------
 # --- Download Android SDK tools into $ANDROID_HOME
 
-RUN cd /opt && wget -q https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz -O android-sdk.tgz
-RUN cd /opt && tar -xvzf android-sdk.tgz
-RUN cd /opt && rm -f android-sdk.tgz
+RUN cd /opt && wget -q https://dl.google.com/android/android-sdk_r24.4.1-linux.tgz -O android-sdk.tgz && \
+    tar -xvzf android-sdk.tgz && \
+    rm -f android-sdk.tgz
 
 ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
 
@@ -84,17 +85,19 @@ RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-
 # --- Install Gradle from PPA
 
 # Gradle PPA
-RUN apt-get update
-RUN apt-get -y install gradle
-RUN gradle -v
+RUN apt-get update && \
+    apt-get -y install gradle && \
+    gradle -v && \
+    rm -rf /var/lib/apt/lists/*
 
 # ------------------------------------------------------
 # --- Install Maven 3 from PPA
 
-RUN apt-get -y purge maven maven2
-RUN apt-get update
-RUN apt-get -y install maven
-RUN mvn --version
+RUN apt-get -y purge maven maven2 && \
+    apt-get update && \
+    apt-get -y install maven && \
+    mvn --version && \
+    rm -rf /var/lib/apt/lists/*
 
 # ------------------------------------------------------
 # --- Install Fastlane
@@ -104,20 +107,22 @@ RUN mvn --version
 # copied from https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes
 ENV CLOUDSDK_CORE_DISABLE_PROMPTS 1
 ENV PATH /opt/google-cloud-sdk/bin:$PATH
-USER root
-RUN apt-get update -y
-RUN apt-get install -y jq
-RUN curl https://sdk.cloud.google.com | bash && mv google-cloud-sdk /opt
-RUN gcloud components install kubectl
+#USER root
+RUN apt-get update -y && \
+    apt-get install -y jq && \
+    curl https://sdk.cloud.google.com | bash && mv google-cloud-sdk /opt && \
+    gcloud components install kubectl && \
+    rm -rf /var/lib/apt/lists/*
 
 # added by Ackee
-RUN /bin/sh -c curl https://get.docker.com | sh
+RUN curl https://get.docker.com | bash
 
 # ------------------------------------------------------
 # --- Cleanup and rev num
 
 # Cleaning
-RUN apt-get clean
+#RUN apt-get clean
 
 ENV BITRISE_DOCKER_REV_NUMBER_ANDROID v2016_10_20_1
 CMD bitrise -version
+
