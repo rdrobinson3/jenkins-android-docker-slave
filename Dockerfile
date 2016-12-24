@@ -6,7 +6,6 @@ ENV ANDROID_HOME /opt/android-sdk-linux
 # ------------------------------------------------------
 # --- Install required tools
 USER root
-#RUN apt-get update -y
 
 # Base (non android specific) tools
 # -> should be added to bitriseio/docker-bitrise-base
@@ -14,7 +13,7 @@ USER root
 # Dependencies to execute Android builds
 RUN dpkg --add-architecture i386 && \
     apt-get update && \ 
-    DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 libstdc++6:i386 libgcc1:i386 libncurses5:i386 libz1:i386 && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 libstdc++6:i386 libgcc1:i386 libncurses5:i386 libz1:i386 gradle maven jq && \
     rm -rf /var/lib/apt/lists/*
 
 
@@ -37,91 +36,56 @@ ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
 # (!!!) Only install one package at a time, as "echo y" will only work for one license!
 #       If you don't do it this way you might get "Unknown response" in the logs,
 #         but the android SDK tool **won't** fail, it'll just **NOT** install the package.
-RUN echo y | android update sdk --no-ui --all --filter platform-tools | grep 'package installed'
-
-
+RUN echo y | android update sdk --no-ui --all --filter platform-tools | grep 'package installed' ; \
 # SDKs
 # Please keep these in descending order!
-RUN echo y | android update sdk --no-ui --all --filter android-25 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter android-24 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter android-23 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter android-22 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter android-21 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter android-25 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter android-24 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter android-23 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter android-22 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter android-21 | grep 'package installed'
 
 # build tools
 # Please keep these in descending order!
-RUN echo y | android update sdk --no-ui --all --filter build-tools-25.0.2 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-25.0.1 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-25.0.0 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-24.0.3 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-24.0.2 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-24.0.1 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-24.0.0 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-23.0.3 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-23.0.2 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-23.0.1 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-22.0.1 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-21.1.2 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-25.0.2 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-25.0.1 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-25.0.0 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-24.0.3 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-24.0.2 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-24.0.1 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-24.0.0 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-23.0.3 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-23.0.2 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-23.0.1 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-22.0.1 | grep 'package installed'
+    echo y | android update sdk --no-ui --all --filter build-tools-21.1.2 | grep 'package installed'
 
 
 # Android System Images, for emulators
 # Please keep these in descending order!
-RUN echo y | android update sdk --no-ui --all --filter sys-img-armeabi-v7a-android-24 | grep 'package installed'
+   echo y | android update sdk --no-ui --all --filter sys-img-armeabi-v7a-android-24 | grep 'package installed'
 
 
 # Extras
-RUN echo y | android update sdk --no-ui --all --filter extra-android-m2repository | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter extra-google-m2repository | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter extra-google-google_play_services | grep 'package installed'
+   echo y | android update sdk --no-ui --all --filter extra-android-m2repository | grep 'package installed'
+   echo y | android update sdk --no-ui --all --filter extra-google-m2repository | grep 'package installed'
+   echo y | android update sdk --no-ui --all --filter extra-google-google_play_services | grep 'package installed'
 
 # google apis
 # Please keep these in descending order!
-RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-23 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-22 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-21 | grep 'package installed'
+   echo y | android update sdk --no-ui --all --filter addon-google_apis-google-23 | grep 'package installed'
+   echo y | android update sdk --no-ui --all --filter addon-google_apis-google-22 | grep 'package installed'
+   echo y | android update sdk --no-ui --all --filter addon-google_apis-google-21 | grep 'package installed'
 
-
-# ------------------------------------------------------
-# --- Install Gradle from PPA
-
-# Gradle PPA
-RUN apt-get update && \
-    apt-get -y install gradle && \
-    gradle -v && \
-    rm -rf /var/lib/apt/lists/*
-
-# ------------------------------------------------------
-# --- Install Maven 3 from PPA
-
-RUN apt-get -y purge maven maven2 && \
-    apt-get update && \
-    apt-get -y install maven && \
-    mvn --version && \
-    rm -rf /var/lib/apt/lists/*
-
-# ------------------------------------------------------
-# --- Install Fastlane
-#RUN gem install fastlane --no-document
-#RUN fastlane --version
 
 # copied from https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes
 ENV CLOUDSDK_CORE_DISABLE_PROMPTS 1
 ENV PATH /opt/google-cloud-sdk/bin:$PATH
-#USER root
-RUN apt-get update -y && \
-    apt-get install -y jq && \
-    curl https://sdk.cloud.google.com | bash && mv google-cloud-sdk /opt && \
-    gcloud components install kubectl && \
-    rm -rf /var/lib/apt/lists/*
+RUN curl https://sdk.cloud.google.com | bash && mv google-cloud-sdk /opt && \
+    gcloud components install kubectl
 
 # added by Ackee
 RUN curl https://get.docker.com | bash
-
-# ------------------------------------------------------
-# --- Cleanup and rev num
-
-# Cleaning
-#RUN apt-get clean
 
 ENV BITRISE_DOCKER_REV_NUMBER_ANDROID v2016_10_20_1
 CMD bitrise -version
