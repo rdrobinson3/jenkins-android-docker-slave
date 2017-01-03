@@ -80,8 +80,8 @@ RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-
 RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-22 | grep 'package installed'
 RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-21 | grep 'package installed'
 
-# fix permissions
-RUN chown -R jenkins:jenkins $ANDROID_HOME && chmod g+w $ANDROID_HOME 
+# fix permissions and AVD creation fail (might be jenkins Android emulator plugin bug)
+RUN chown -R jenkins:jenkins $ANDROID_HOME && chmod -R g+w $ANDROID_HOME && ln -s /root/.android /home/jenkins/.android
 # ------------------------------------------------------
 # --- Install Gradle from PPA
 
