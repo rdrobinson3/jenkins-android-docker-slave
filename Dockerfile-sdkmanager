@@ -1,0 +1,110 @@
+FROM jenkinsci/jnlp-slave
+
+ENV ANDROID_HOME /opt/android-sdk-linux
+
+# ------------------------------------------------------
+# --- Install required tools
+USER root
+
+# Base (non android specific) tools
+# -> should be added to bitriseio/docker-bitrise-base
+
+# Dependencies to execute Android builds
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 libstdc++6:i386 libgcc1:i386 libncurses5:i386 libz1:i386 && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# ------------------------------------------------------
+# --- Download Android SDK tools into $ANDROID_HOME
+
+RUN cd /opt && wget -q https://dl.google.com/android/repository/tools_r25.2.4-linux.zip -O android-sdk-tools.zip && \
+    unzip -q android-sdk-tools.zip && mkdir -p ${ANDROID_HOME} && mv tools/ ${ANDROID_HOME}/tools/ && \
+    rm -f android-sdk-tools.zip
+
+ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/tools/bin
+
+# Install Android SDK packages
+# sdkmanager wrapper
+RUN cd ${ANDROID_HOME}/tools/bin/ && \
+    mv sdkmanager sdkmanager.bin  && \
+    echo '#!/bin/bash' >sdkmanager && echo 'echo -n "$1 " && echo y | sdkmanager.bin "$1" | grep done' >>sdkmanager && \
+    chmod +x sdkmanager
+
+RUN mkdir /root/.android/ && touch /root/.android/repositories.cfg
+# Platform tools latest
+RUN sdkmanager "platform-tools"
+# Platforms
+RUN sdkmanager "platforms;android-25" && \
+    sdkmanager "platforms;android-24" && \
+    sdkmanager "platforms;android-23" && \
+    sdkmanager "platforms;android-22" && \
+    sdkmanager "platforms;android-21"
+# Build tools
+RUN sdkmanager "build-tools;25.0.2" && \
+    sdkmanager "build-tools;25.0.1" && \
+    sdkmanager "build-tools;25.0.0" && \
+    sdkmanager "build-tools;24.0.3" && \
+    sdkmanager "build-tools;24.0.2" && \
+    sdkmanager "build-tools;24.0.1" && \
+    sdkmanager "build-tools;24.0.0" && \
+    sdkmanager "build-tools;23.0.3" && \
+    sdkmanager "build-tools;23.0.2" && \
+    sdkmanager "build-tools;23.0.1" && \
+    sdkmanager "build-tools;22.0.1" && \
+    sdkmanager "build-tools;21.1.2"
+# System images
+RUN sdkmanager "system-images;android-24;default;armeabi-v7a"
+# Extras
+RUN sdkmanager "extras;android;m2repository"        && \
+    sdkmanager "extras;google;m2repository"         && \
+    sdkmanager "extras;google;google_play_services"
+# Addons
+RUN sdkmanager "add-ons;addon-google_apis-google-23"   && \
+    sdkmanager "add-ons;addon-google_apis-google-22"   && \
+    sdkmanager "add-ons;addon-google_apis-google-21"
+
+# ------------------------------------------------------
+# --- Install Gradle from PPA
+
+# Gradle PPA
+RUN apt-get update && \
+    apt-get -y install gradle && \
+    gradle -v && \
+    rm -rf /var/lib/apt/lists/*
+
+# ------------------------------------------------------
+# --- Install Maven 3 from PPA
+
+RUN apt-get -y purge maven maven2 && \
+    apt-get update && \
+    apt-get -y install maven && \
+    mvn --version && \
+    rm -rf /var/lib/apt/lists/*
+
+# ------------------------------------------------------
+# --- Install Fastlane
+#RUN gem install fastlane --no-document
+#RUN fastlane --version
+
+# copied from https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes
+ENV CLOUDSDK_CORE_DISABLE_PROMPTS 1
+ENV PATH /opt/google-cloud-sdk/bin:$PATH
+#USER root
+RUN apt-get update -y && \
+    apt-get install -y jq && \
+    curl https://sdk.cloud.google.com | bash && mv google-cloud-sdk /opt && \
+    gcloud components install kubectl && \
+    rm -rf /var/lib/apt/lists/*
+
+# added by Ackee
+RUN curl https://get.docker.com | bash
+
+# fix HOME root env variables for android emulator plugin...
+WORKDIR /root
+ENV HOME /root
+RUN usermod -d /root jenkins && chown -R jenkins:root /root
+
+ENV BITRISE_DOCKER_REV_NUMBER_ANDROID v2016_10_20_1
+CMD bitrise -version
