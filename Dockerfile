@@ -80,8 +80,6 @@ RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-
 RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-22 | grep 'package installed'
 RUN echo y | android update sdk --no-ui --all --filter addon-google_apis-google-21 | grep 'package installed'
 
-# fix permissions and AVD creation fail (might be jenkins Android emulator plugin bug)
-RUN chown -R jenkins:jenkins $ANDROID_HOME && chmod -R g+w $ANDROID_HOME && ln -s /root/.android /home/jenkins/.android
 # ------------------------------------------------------
 # --- Install Gradle from PPA
 
@@ -118,12 +116,11 @@ RUN apt-get update -y && \
 # added by Ackee
 RUN curl https://get.docker.com | bash
 
-# ------------------------------------------------------
-# --- Cleanup and rev num
-
-# Cleaning
-#RUN apt-get clean
+# fix HOME root env variables for android emulator plugin...
+WORKDIR /root
+ENV HOME /root
+RUN usermod -d /root jenkins && chown -R jenkins:root /root && \
+    chown -R jenkins:jenkins $ANDROID_HOME && chmod -R g+w $ANDROID_HOME
 
 ENV BITRISE_DOCKER_REV_NUMBER_ANDROID v2016_10_20_1
 CMD bitrise -version
-
