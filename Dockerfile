@@ -6,17 +6,31 @@ ENV ANDROID_HOME /opt/android-sdk-linux
 # ------------------------------------------------------
 # --- Install required tools
 USER root
-#RUN apt-get update -y
+RUN apt-get update && apt-get install -y --no-install-recommends \
+                bzip2 \
+                unzip \
+                xz-utils \
+        && rm -rf /var/lib/apt/lists/*
+
+RUN echo 'deb http://deb.debian.org/debian jessie-backports main' > /etc/apt/sources.list.d/jessie-backports.list
+
 
 # Base (non android specific) tools
 # -> should be added to bitriseio/docker-bitrise-base
+ENV JAVA_VERSION 8u121
+ENV JAVA_DEBIAN_VERSION 8u121-b13-1~bpo8+1
+
+# see https://bugs.debian.org/775775
+# and https://github.com/docker-library/java/issues/19#issuecomment-70546872
+ENV CA_CERTIFICATES_JAVA_VERSION 20161107~bpo8+1
 
 # Dependencies to execute Android builds
 RUN dpkg --add-architecture i386 && \
     apt-get update && \ 
-    DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 libstdc++6:i386 libgcc1:i386 libncurses5:i386 libz1:i386 && \
-    rm -rf /var/lib/apt/lists/*
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends openjdk-8-jdk="$JAVA_DEBIAN_VERSION" ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" libc6:i386 libstdc++6:i386 libgcc1:i386 libncurses5:i386 libz1:i386 \
+    && rm -rf /var/lib/apt/lists/*  
 
+RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
 # ------------------------------------------------------
 # --- Download Android SDK tools into $ANDROID_HOME
@@ -52,7 +66,7 @@ RUN echo y | android update sdk --no-ui --all --filter android-21 | grep 'packag
 # Please keep these in descending order!
 RUN echo y | android update sdk --no-ui --all --filter build-tools-25.0.2 | grep 'package installed'
 RUN echo y | android update sdk --no-ui --all --filter build-tools-25.0.1 | grep 'package installed'
-RUN echo y | android update sdk --no-ui --all --filter build-tools-25.0.0 | grep 'package installed'
+#RUN echo y | android update sdk --no-ui --all --filter build-tools-25.0.0 | grep 'package installed'
 RUN echo y | android update sdk --no-ui --all --filter build-tools-24.0.3 | grep 'package installed'
 RUN echo y | android update sdk --no-ui --all --filter build-tools-24.0.2 | grep 'package installed'
 RUN echo y | android update sdk --no-ui --all --filter build-tools-24.0.1 | grep 'package installed'
